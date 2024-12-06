@@ -149,11 +149,11 @@
     <!-- Chart -->
     <div class="max-w-5xl mx-auto py-1 mb-16">
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div class="text-black p-6 rounded-lg shadow-lg" id="Chart3">
-          Chart 3
+        <div class="text-black p-6 rounded-lg shadow-lg" id="ChartAlumni">
+          Alumni
         </div>
         <div class="text-black p-6 rounded-lg shadow-lg" id="Chart4">
-          Chart 4
+          Lowongan
         </div>
       </div>
     </div>
@@ -326,98 +326,102 @@
     <script>
       AOS.init();
 
-      // Chart 3
+      fetch('/api/alumni')
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+
+      const monthOrder = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    
+    // Urutkan data berdasarkan monthOrder
+    const sortedMonths = monthOrder.map(month => ({
+      month: month,
+      kerja: data[month]?.["kerja"] || 0, // Default ke 0 jika data tidak ada
+      belumKerja: data[month]?.["belum-kerja"] || 0 // Default ke 0 jika data tidak ada
+    }));
+
+    // Pisahkan data untuk chart
+    const kerjaData = sortedMonths.map(item => item.kerja);
+    const belumKerjaData = sortedMonths.map(item => item.belumKerja);
+    const months = sortedMonths.map(item => item.month);
+
       var options = {
         series: [
           {
-            name: "series1",
-            data: [31, 40, 28, 51, 42, 109, 100],
+            name: "Kerja",
+            data: kerjaData,
           },
           {
-            name: "series2",
-            data: [11, 32, 45, 32, 34, 52, 41],
+            name: "Belum Kerja",
+            data: belumKerjaData,
           },
         ],
         chart: {
           height: 350,
-          type: "area",
+          type: 'area',
         },
         dataLabels: {
           enabled: false,
         },
         stroke: {
-          curve: "smooth",
+          curve: 'smooth',
         },
         xaxis: {
-          type: "datetime",
-          categories: [
-            "2018-09-19T00:00:00.000Z",
-            "2018-09-19T01:30:00.000Z",
-            "2018-09-19T02:30:00.000Z",
-            "2018-09-19T03:30:00.000Z",
-            "2018-09-19T04:30:00.000Z",
-            "2018-09-19T05:30:00.000Z",
-            "2018-09-19T06:30:00.000Z",
-          ],
+          categories: months,
         },
         tooltip: {
           x: {
-            format: "dd/MM/yy HH:mm",
+            format: 'dd/MM/yy HH:mm',
           },
         },
       };
 
-      var chart = new ApexCharts(document.querySelector("#Chart3"), options);
+      var chart = new ApexCharts(document.querySelector("#ChartAlumni"), options);
       chart.render();
-
+    })
+    .catch(error => console.error('Error:', error));
       // Chart 4
-      var options = {
-        series: [
-          {
-            name: "Desktops",
-            data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
-          },
-        ],
-        chart: {
-          height: 350,
-          type: "line",
-          zoom: {
-            enabled: false,
-          },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        stroke: {
-          curve: "straight",
-        },
-        title: {
-          text: "Product Trends by Month",
-          align: "left",
-        },
-        grid: {
-          row: {
-            colors: ["#f3f3f3", "transparent"], // takes an array which will be repeated on columns
-            opacity: 0.5,
-          },
-        },
-        xaxis: {
-          categories: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-          ],
-        },
-      };
+      fetch('/api/lowongan')
+            .then(response => response.json())
+            .then(data => {
+                // Ensure the data is sorted correctly by month
+                const monthOrder = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                const sortedData = monthOrder.map(month => data[month]);
 
-      var chart = new ApexCharts(document.querySelector("#Chart4"), options);
-      chart.render();
+                var options = {
+                    series: [{
+                        name: "Lowongan",
+                        data: sortedData
+                    }],
+                    chart: {
+                        height: 350,
+                        type: 'line',
+                        zoom: {
+                            enabled: false
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'straight'
+                    },
+                    
+                    grid: {
+                        row: {
+                            colors: ['#f3f3f3', 'transparent'],
+                            opacity: 0.5
+                        }
+                    },
+                    xaxis: {
+                        categories: monthOrder
+                    }
+                };
+
+                var chart = new ApexCharts(document.querySelector("#Chart4"), options);
+                chart.render();
+            })
+            .catch(error => console.error('Error fetching data:', error));
     </script>
     <script src="../static/js/script.js"></script>
   </body>

@@ -157,6 +157,71 @@ def get_chart2_data():
 @app.route('/bkk')
 def bkk():
     return render_template('bkk.html')
+@app.route('/api/lowongan', methods=['GET'])
+def get_lowongan_data():
+    query = """
+        SELECT bulan, jumlah_lowongan
+        FROM lowongan
+    """
+    data = query_db(query)
+
+    # Create a dictionary to store the data
+    chart_data = {month: 0 for month in ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]}
+
+    # Fill the dictionary with the data from the query
+    for row in data:
+        bulan = row['bulan']
+        jumlah = row['jumlah_lowongan']
+        chart_data[bulan] = jumlah
+
+    # Sort the chart data to ensure the correct order
+    month_order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+    sorted_chart_data = {month: chart_data[month] for month in month_order}
+
+    return jsonify(sorted_chart_data)
+@app.route('/api/alumni', methods=['GET'])
+def get_alumni_data():
+    query = """
+        SELECT bulan, status, SUM(jumlah_alumni) AS jumlah
+        FROM alumni
+        GROUP BY bulan, status
+        ORDER BY CASE
+            WHEN bulan = 'Jan' THEN 1
+            WHEN bulan = 'Feb' THEN 2
+            WHEN bulan = 'Mar' THEN 3
+            WHEN bulan = 'Apr' THEN 4
+            WHEN bulan = 'Mei' THEN 5
+            WHEN bulan = 'Jun' THEN 6
+            WHEN bulan = 'Jul' THEN 7
+            WHEN bulan = 'Agu' THEN 8
+            WHEN bulan = 'Sep' THEN 9
+            WHEN bulan = 'Okt' THEN 10
+            WHEN bulan = 'Nov' THEN 11
+            WHEN bulan = 'Des' THEN 12
+        END
+    """
+    data = query_db(query)
+
+    # Inisialisasi data untuk grafik
+    chart_data = {month: {"kerja": 0, "belum-kerja": 0} for month in ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]}
+
+    # Memproses hasil query
+    for row in data:
+        bulan = row['bulan']
+        status = row['status']
+        jumlah = row['jumlah']
+        if status == 'kerja':
+            chart_data[bulan]["kerja"] += jumlah
+        elif status == 'belum-kerja':
+            chart_data[bulan]["belum-kerja"] += jumlah
+
+    # Sort data berdasarkan urutan bulan
+    month_order = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+    sorted_chart_data = {month: chart_data[month] for month in month_order}
+
+    return jsonify(sorted_chart_data)
+
+
 
 # Route untuk halaman Sosial
 @app.route('/sosial')

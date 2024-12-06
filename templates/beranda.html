@@ -368,25 +368,42 @@
   .then(chart1_data => {
     console.log("Chart 1 Data:", chart1_data);
 
-    // Ensure that the data is valid for Chart 1
+    // Pastikan data valid
     if (Object.keys(chart1_data).length === 0) {
       console.error("Data untuk Chart 1 tidak valid", chart1_data);
+      return;
     }
 
-    // Prepare data series for the chart
-    var pklData = [];
-    var belumPklData = [];
-    var categories = [];
+    // Urutan bulan yang diinginkan
+    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-    // Loop through the months to get data for pkl and belum-pkl
-    for (var month in chart1_data) {
-      pklData.push(chart1_data[month]["pkl"]);
-      belumPklData.push(chart1_data[month]["belum-pkl"]);
+    // Mengurutkan data berdasarkan urutan bulan
+    const sortedData = monthOrder.reduce((acc, month) => {
+      if (chart1_data[month]) {
+        acc[month] = chart1_data[month];
+      } else {
+        // Jika bulan tidak ada di data, tambahkan nilai default
+        acc[month] = { pkl: 0, "belum-pkl": 0 };
+      }
+      return acc;
+    }, {});
+
+    console.log("Sorted Chart 1 Data:", sortedData);
+
+    // Siapkan data untuk chart
+    const pklData = [];
+    const belumPklData = [];
+    const categories = [];
+
+    for (const month of monthOrder) {
+      const data = sortedData[month];
+      pklData.push(data["pkl"]);
+      belumPklData.push(data["belum-pkl"]);
       categories.push(month);
     }
 
-    // Konfigurasi Chart 1 (Bar Chart)
-    var options1 = {
+    // Konfigurasi Chart 1
+    const options1 = {
       chart: {
         type: 'bar',
         height: 350,
@@ -394,21 +411,21 @@
       series: [
         {
           name: 'PKL',
-          data: pklData,  // Data for PKL
+          data: pklData,
         },
         {
           name: 'Belum PKL',
-          data: belumPklData,  // Data for Belum PKL
+          data: belumPklData,
         },
       ],
       xaxis: {
-        categories: categories,  // Month categories
+        categories: categories,
       },
-      colors: ['#008FFB', '#00E396'],  // Colors for the bars
+      colors: ['#008FFB', '#00E396'],
     };
 
     // Render Chart 1
-    var chart1 = new ApexCharts(document.querySelector("#Chart1"), options1);
+    const chart1 = new ApexCharts(document.querySelector("#Chart1"), options1);
     chart1.render();
   })
   .catch(error => console.error("Error fetching Chart 1 data:", error));
